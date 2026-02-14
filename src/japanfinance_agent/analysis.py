@@ -7,11 +7,23 @@ MCP calls if done individually.
 from __future__ import annotations
 
 import asyncio
+import re
 from typing import Any, TypedDict, cast
 
 from loguru import logger
 
 from japanfinance_agent import adapters
+
+_TASK_TIMEOUT = 15.0  # Per-task timeout in seconds
+_CORP_SUFFIX_RE = re.compile(r"株式会社|㈱|有限会社|合同会社")
+
+
+async def _with_timeout(coro: Any, timeout: float = _TASK_TIMEOUT) -> Any:
+    """Wrap a coroutine with a timeout, returning the error on timeout."""
+    try:
+        return await asyncio.wait_for(coro, timeout=timeout)
+    except asyncio.TimeoutError:
+        return TimeoutError(f"timed out after {timeout}s")
 
 
 class CompanyAnalysis(TypedDict):
@@ -91,27 +103,22 @@ async def analyze_company(
     tasks: dict[str, Any] = {}
 
     if edinet_code:
-        tasks["statements"] = adapters.get_company_statements(
-            edinet_code,
-            period=period,
+        tasks["statements"] = _with_timeout(
+            adapters.get_company_statements(edinet_code, period=period)
         )
 
-    tasks["disclosures"] = adapters.get_company_disclosures(
-        code,
-        limit=disclosure_limit,
+    tasks["disclosures"] = _with_timeout(
+        adapters.get_company_disclosures(code, limit=disclosure_limit)
     )
 
-    # Search news by company name or code
-    search_term = company_name or code
-    tasks["news"] = adapters.get_news(search_term, limit=news_limit)
-    tasks["stock_price"] = adapters.get_stock_price(code)
+    # Search news by shortened company name or code
+    search_term = _CORP_SUFFIX_RE.sub("", company_name).strip() if company_name else code
+    tasks["news"] = _with_timeout(adapters.get_news(search_term, limit=news_limit))
+    tasks["stock_price"] = _with_timeout(adapters.get_stock_price(code))
 
-    # Run all in parallel
+    # Run all in parallel (each task has its own timeout)
     keys = list(tasks.keys())
-    results_list = await asyncio.gather(
-        *tasks.values(),
-        return_exceptions=True,
-    )
+    results_list = await asyncio.gather(*tasks.values(), return_exceptions=True)
     results = dict(zip(keys, results_list, strict=True))
 
     # Process results — narrow types from gather's BaseException union
@@ -184,17 +191,14 @@ async def macro_snapshot(
     sources_used: list[str] = []
 
     tasks: dict[str, Any] = {
-        "estat": adapters.get_estat_data(keyword, limit=estat_limit),
-        "news": adapters.get_news(keyword, limit=news_limit),
+        "estat": _with_timeout(adapters.get_estat_data(keyword, limit=estat_limit)),
+        "news": _with_timeout(adapters.get_news(keyword, limit=news_limit)),
     }
     if boj_dataset:
-        tasks["boj"] = adapters.get_boj_dataset(boj_dataset)
+        tasks["boj"] = _with_timeout(adapters.get_boj_dataset(boj_dataset))
 
     keys = list(tasks.keys())
-    results_list = await asyncio.gather(
-        *tasks.values(),
-        return_exceptions=True,
-    )
+    results_list = await asyncio.gather(*tasks.values(), return_exceptions=True)
     results = dict(zip(keys, results_list, strict=True))
 
     raw_estat = results.get("estat", [])
@@ -250,9 +254,12 @@ async def earnings_monitor(
     sources_used: list[str] = []
     total_disclosures = 0
 
-    # Fetch disclosures for all companies in parallel
-    tasks = [adapters.get_company_disclosures(code, limit=disclosure_limit) for code in codes]
-    results = await asyncio.gather(*tasks, return_exceptions=True)
+    # Fetch disclosures for all companies in parallel (each with timeout)
+    task_list = [
+        _with_timeout(adapters.get_company_disclosures(code, limit=disclosure_limit))
+        for code in codes
+    ]
+    results = await asyncio.gather(*task_list, return_exceptions=True)
 
     companies: list[EarningsEntry] = []
     for code, result in zip(codes, results, strict=True):

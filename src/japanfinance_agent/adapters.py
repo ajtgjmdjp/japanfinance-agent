@@ -45,7 +45,14 @@ async def get_company_statements(
         logger.debug("edinet-mcp not installed, skipping")
         return None
 
+    from datetime import datetime
+
     from edinet_mcp import EdinetClient, calculate_metrics
+
+    # Default to previous fiscal year if not specified
+    if period is None:
+        now = datetime.now()
+        period = str(now.year - 1) if now.month >= 7 else str(now.year - 2)
 
     try:
         async with EdinetClient() as client:
@@ -172,8 +179,8 @@ async def get_news(
 
     from japan_news_mcp.client import NewsClient
 
+    client = NewsClient()
     try:
-        client = NewsClient()
         if query:
             articles = await client.search(query, limit=limit)
         else:
@@ -191,6 +198,8 @@ async def get_news(
     except Exception as e:
         logger.warning(f"News fetch failed: {e}")
         return []
+    finally:
+        await client.close()
 
 
 # ---------------------------------------------------------------------------
@@ -211,8 +220,8 @@ async def get_stock_price(
 
     from jquants_mcp.client import JQuantsClient
 
+    client = JQuantsClient()
     try:
-        client = JQuantsClient()
         result = await client.get_stock_price(
             code,
             start_date=start_date,
@@ -236,6 +245,8 @@ async def get_stock_price(
     except Exception as e:
         logger.warning(f"J-Quants fetch failed for {code}: {e}")
         return None
+    finally:
+        await client.close()
 
 
 # ---------------------------------------------------------------------------
@@ -253,7 +264,7 @@ async def get_estat_data(
         logger.debug("estat-mcp not installed, skipping")
         return []
 
-    from estat_mcp.client import EstatClient  # type: ignore[import-untyped]
+    from estat_mcp.client import EstatClient
 
     try:
         async with EstatClient() as client:
@@ -261,10 +272,10 @@ async def get_estat_data(
             return [
                 {
                     "source": "estat",
-                    "stats_id": t.stats_id,
-                    "title": t.title,
+                    "stats_id": t.id,
+                    "title": t.name,
                     "survey_date": t.survey_date,
-                    "gov_org": t.gov_org,
+                    "gov_org": t.organization,
                 }
                 for t in tables
             ]

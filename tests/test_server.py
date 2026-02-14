@@ -26,17 +26,28 @@ class TestAnalyzeCompanyTool:
     """Test analyze_japanese_company tool logic."""
 
     @patch.object(
-        adapters, "get_stock_price", new_callable=AsyncMock, return_value=None,
+        adapters,
+        "get_stock_price",
+        new_callable=AsyncMock,
+        return_value=None,
     )
     @patch.object(adapters, "get_news", new_callable=AsyncMock, return_value=[])
     @patch.object(
-        adapters, "get_company_disclosures", new_callable=AsyncMock, return_value=[],
+        adapters,
+        "get_company_disclosures",
+        new_callable=AsyncMock,
+        return_value=[],
     )
     @patch.object(
-        adapters, "get_company_statements", new_callable=AsyncMock, return_value=None,
+        adapters,
+        "get_company_statements",
+        new_callable=AsyncMock,
+        return_value=None,
     )
     @patch.object(
-        adapters, "search_companies_edinet", new_callable=AsyncMock,
+        adapters,
+        "search_companies_edinet",
+        new_callable=AsyncMock,
         return_value=[
             {"edinet_code": "E02144", "name": "トヨタ", "ticker": "7203"},
         ],
@@ -74,7 +85,10 @@ class TestMonitorEarningsTool:
     """Test monitor_earnings tool logic."""
 
     @patch.object(
-        adapters, "get_company_disclosures", new_callable=AsyncMock, return_value=[],
+        adapters,
+        "get_company_disclosures",
+        new_callable=AsyncMock,
+        return_value=[],
     )
     async def test_monitor_returns_result(self, mock_disc: AsyncMock) -> None:
         result = await earnings_monitor(["7203"])
@@ -86,7 +100,9 @@ class TestCheckDataSourcesTool:
     """Test check_data_sources tool logic."""
 
     @patch.object(
-        adapters, "test_connections", new_callable=AsyncMock,
+        adapters,
+        "test_connections",
+        new_callable=AsyncMock,
         return_value={"edinet": "ok (3 results)", "tdnet": "not installed"},
     )
     async def test_check_returns_status(self, mock_test: AsyncMock) -> None:

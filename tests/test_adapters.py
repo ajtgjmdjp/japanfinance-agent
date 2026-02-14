@@ -60,7 +60,9 @@ class TestEdinetAdapter:
         self,
         mock_avail: MagicMock,
     ) -> None:
-        with patch.dict("sys.modules", {"edinet_mcp": MagicMock(side_effect=ImportError)}):
+        mock_module = MagicMock()
+        mock_module.EdinetClient.side_effect = Exception("test error")
+        with patch.dict("sys.modules", {"edinet_mcp": mock_module}):
             result = await adapters.get_company_statements("E02144")
             assert result is None
 

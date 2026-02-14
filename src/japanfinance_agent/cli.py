@@ -4,11 +4,33 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 import sys
 from typing import Literal, cast
 
 import click
 from loguru import logger
+
+_CODE_RE = re.compile(r"^\d{4}$")
+
+
+def _validate_code(ctx: click.Context, param: click.Parameter, value: str) -> str:
+    """Validate a 4-digit stock code."""
+    if not _CODE_RE.match(value):
+        raise click.BadParameter(f"{value!r} is not a valid 4-digit stock code")
+    return value
+
+
+def _validate_codes(
+    ctx: click.Context, param: click.Parameter, value: tuple[str, ...]
+) -> tuple[str, ...]:
+    """Validate a tuple of stock codes."""
+    if len(value) > 20:
+        raise click.BadParameter(f"Too many codes ({len(value)}, max 20)")
+    for v in value:
+        if not _CODE_RE.match(v):
+            raise click.BadParameter(f"{v!r} is not a valid 4-digit stock code")
+    return value
 
 
 @click.group()
@@ -21,7 +43,7 @@ def cli(verbose: bool) -> None:
 
 
 @cli.command()
-@click.argument("code")
+@click.argument("code", callback=_validate_code)
 @click.option("--edinet-code", "-e", default=None, help="EDINET code (e.g. E02144).")
 @click.option("--period", "-p", default=None, help="Filing year (e.g. 2025).")
 @click.option("--json-output", "-j", "as_json", is_flag=True, help="Output as JSON.")
@@ -112,7 +134,7 @@ def macro(keyword: str, boj_dataset: str | None, as_json: bool) -> None:
 
 
 @cli.command()
-@click.argument("codes", nargs=-1, required=True)
+@click.argument("codes", nargs=-1, required=True, callback=_validate_codes)
 @click.option("--json-output", "-j", "as_json", is_flag=True, help="Output as JSON.")
 def monitor(codes: tuple[str, ...], as_json: bool) -> None:
     """Monitor earnings for a watchlist (TDNET disclosures).
