@@ -1,0 +1,99 @@
+[project]
+name = "japanfinance-agent"
+version = "0.1.0"
+description = "Compound MCP agent combining 6 Japan finance data sources — EDINET, TDNET, e-Stat, BOJ, news, stock prices"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+keywords = [
+    "japan", "finance", "mcp", "agent", "edinet", "tdnet", "estat",
+    "boj", "stock", "xbrl", "financial-data",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial",
+    "Typing :: Typed",
+]
+dependencies = [
+    "httpx>=0.27",
+    "pydantic>=2.0",
+    "fastmcp>=2.0,<3.0",
+    "click>=8.0",
+    "loguru>=0.7",
+]
+
+[project.optional-dependencies]
+edinet = ["edinet-mcp>=0.6.0"]
+tdnet = ["tdnet-disclosure-mcp>=0.1.0"]
+estat = ["estat-mcp>=0.2.0"]
+boj = ["boj-mcp>=0.1.0"]
+news = ["japan-news-mcp>=0.1.0"]
+jquants = ["jquants-mcp>=0.1.0"]
+all = [
+    "edinet-mcp>=0.6.0",
+    "tdnet-disclosure-mcp>=0.1.0",
+    "estat-mcp>=0.2.0",
+    "boj-mcp>=0.1.0",
+    "japan-news-mcp>=0.1.0",
+    "jquants-mcp>=0.1.0",
+]
+dev = [
+    "edinet-mcp>=0.6.0",
+    "tdnet-disclosure-mcp>=0.1.0",
+    "estat-mcp>=0.2.0",
+    "boj-mcp>=0.1.0",
+    "japan-news-mcp>=0.1.0",
+    "jquants-mcp>=0.1.0",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "pytest-cov>=5.0",
+    "ruff>=0.4",
+    "mypy>=1.10",
+]
+
+[project.scripts]
+japanfinance-agent = "japanfinance_agent.cli:cli"
+
+[project.urls]
+Homepage = "https://github.com/ajtgjmdjp/japanfinance-agent"
+Repository = "https://github.com/ajtgjmdjp/japanfinance-agent"
+Issues = "https://github.com/ajtgjmdjp/japanfinance-agent/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+exclude = [".env", ".env.*", ".mcpregistry_*", ".claude/"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/japanfinance_agent"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 99
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "TCH", "RUF"]
+ignore = ["RUF001"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["japanfinance_agent"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+packages = ["japanfinance_agent"]
+mypy_path = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
