@@ -629,7 +629,7 @@ wheels = [
 
 [[package]]
 name = "estat-mcp"
-version = "0.2.0"
+version = "0.2.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -639,9 +639,9 @@ dependencies = [
     { name = "pydantic" },
     { name = "python-dotenv" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2c/69/d22798067e1065424b9d099b991c95eb7ac9a9b768065098f0ad2a64664f/estat_mcp-0.2.0.tar.gz", hash = "sha256:0bc076c2f8461931a20ebf09bf7f4ea96c944931c911b21530dfd3043ff31164", size = 141837, upload-time = "2026-02-14T08:58:25.436Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/39/dd/1b2a59036476b1082b95729e2ee2cbccc2a26e0df981f70d14104c17d0ea/estat_mcp-0.2.1.tar.gz", hash = "sha256:59e0979f76e102b9530f2cc68851a25a439b9338db84f5bb8cbf76268ea1c813", size = 141916, upload-time = "2026-02-14T20:26:28.445Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e9/07/384665706f6edb1a7c62ab5c83f123a9ebabc3108ddb195717b1a7f26c34/estat_mcp-0.2.0-py3-none-any.whl", hash = "sha256:ac79442568c737bec92dc9d3f45f82784f9aa26e38d791f5a0789f218d63a32f", size = 22930, upload-time = "2026-02-14T08:58:36.872Z" },
+    { url = "https://files.pythonhosted.org/packages/df/ff/12bbb27f26b8052cf5a6b88b4268f744b87cbbf1497ad58643ad36fc847b/estat_mcp-0.2.1-py3-none-any.whl", hash = "sha256:421addeede335a56e427f8a7225acbc7eb7649473b07b74ff06f62420cc60bc0", size = 23186, upload-time = "2026-02-14T20:26:25.655Z" },
 ]
 
 [[package]]
@@ -812,7 +812,7 @@ wheels = [
 
 [[package]]
 name = "japanfinance-agent"
-version = "0.1.1"
+version = "0.1.2"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -872,9 +872,9 @@ requires-dist = [
     { name = "edinet-mcp", marker = "extra == 'all'", specifier = ">=0.6.0" },
     { name = "edinet-mcp", marker = "extra == 'dev'", specifier = ">=0.6.0" },
     { name = "edinet-mcp", marker = "extra == 'edinet'", specifier = ">=0.6.0" },
-    { name = "estat-mcp", marker = "extra == 'all'", specifier = ">=0.2.0" },
-    { name = "estat-mcp", marker = "extra == 'dev'", specifier = ">=0.2.0" },
-    { name = "estat-mcp", marker = "extra == 'estat'", specifier = ">=0.2.0" },
+    { name = "estat-mcp", marker = "extra == 'all'", specifier = ">=0.2.1" },
+    { name = "estat-mcp", marker = "extra == 'dev'", specifier = ">=0.2.1" },
+    { name = "estat-mcp", marker = "extra == 'estat'", specifier = ">=0.2.1" },
     { name = "fastmcp", specifier = ">=2.0,<3.0" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "japan-news-mcp", marker = "extra == 'all'", specifier = ">=0.1.0" },

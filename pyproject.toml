@@ -1,6 +1,6 @@
 [project]
 name = "japanfinance-agent"
-version = "0.1.1"
+version = "0.1.2"
 description = "Compound MCP agent combining 6 Japan finance data sources — EDINET, TDNET, e-Stat, BOJ, news, stock prices"
 readme = "README.md"
 license = "Apache-2.0"
@@ -32,14 +32,14 @@ dependencies = [
 [project.optional-dependencies]
 edinet = ["edinet-mcp>=0.6.0"]
 tdnet = ["tdnet-disclosure-mcp>=0.1.0"]
-estat = ["estat-mcp>=0.2.0"]
+estat = ["estat-mcp>=0.2.1"]
 boj = ["boj-mcp>=0.1.0"]
 news = ["japan-news-mcp>=0.1.0"]
 jquants = ["jquants-mcp>=0.1.0"]
 all = [
     "edinet-mcp>=0.6.0",
     "tdnet-disclosure-mcp>=0.1.0",
-    "estat-mcp>=0.2.0",
+    "estat-mcp>=0.2.1",
     "boj-mcp>=0.1.0",
     "japan-news-mcp>=0.1.0",
     "jquants-mcp>=0.1.0",
@@ -47,7 +47,7 @@ all = [
 dev = [
     "edinet-mcp>=0.6.0",
     "tdnet-disclosure-mcp>=0.1.0",
-    "estat-mcp>=0.2.0",
+    "estat-mcp>=0.2.1",
     "boj-mcp>=0.1.0",
     "japan-news-mcp>=0.1.0",
     "jquants-mcp>=0.1.0",

@@ -8,12 +8,22 @@ from __future__ import annotations
 
 import json
 import re
+from typing import Annotated, Any
 
 from fastmcp import FastMCP
 from loguru import logger
+from pydantic import BeforeValidator
 
 from japanfinance_agent import adapters
 from japanfinance_agent.analysis import analyze_company, earnings_monitor, macro_snapshot
+
+
+def _coerce_str(v: Any) -> str | None:
+    """Coerce int to str — MCP clients may send numeric values as int."""
+    if v is None:
+        return None
+    return str(v)
+
 
 _CODE_RE = re.compile(r"^\d{4}$")
 _EDINET_CODE_RE = re.compile(r"^E\d{5}$")
@@ -31,9 +41,9 @@ mcp = FastMCP(
 
 @mcp.tool()
 async def analyze_japanese_company(
-    code: str,
-    edinet_code: str | None = None,
-    period: str | None = None,
+    code: Annotated[str, BeforeValidator(_coerce_str)],
+    edinet_code: Annotated[str | None, BeforeValidator(_coerce_str)] = None,
+    period: Annotated[str | None, BeforeValidator(_coerce_str)] = None,
 ) -> str:
     """Comprehensive analysis of a Japanese company.
 
