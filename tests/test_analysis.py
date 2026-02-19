@@ -176,23 +176,6 @@ class TestMacroSnapshot:
         assert result["sources_used"] == []
         assert result["estat_data"] == []
 
-    @patch.object(adapters, "get_estat_data", new_callable=AsyncMock, return_value=[])
-    @patch.object(
-        adapters,
-        "get_boj_dataset",
-        new_callable=AsyncMock,
-        return_value={"source": "boj", "name": "rates"},
-    )
-    async def test_macro_with_boj(
-        self,
-        mock_boj: AsyncMock,
-        mock_estat: AsyncMock,
-    ) -> None:
-        result = await macro_snapshot(boj_dataset="rates")
-
-        assert "boj" in result["sources_used"]
-        assert result["boj_data"] is not None
-
 
 class TestEarningsMonitor:
     """Test earnings_monitor compound tool."""

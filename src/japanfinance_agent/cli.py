@@ -93,10 +93,9 @@ def analyze(code: str, edinet_code: str | None, period: str | None, as_json: boo
 
 @cli.command()
 @click.option("--keyword", "-k", default="GDP", help="e-Stat search keyword.")
-@click.option("--boj-dataset", "-b", default=None, help="BOJ dataset name.")
 @click.option("--json-output", "-j", "as_json", is_flag=True, help="Output as JSON.")
-def macro(keyword: str, boj_dataset: str | None, as_json: bool) -> None:
-    """Macro economic snapshot (e-Stat + BOJ).
+def macro(keyword: str, as_json: bool) -> None:
+    """Macro economic snapshot (e-Stat government statistics).
 
     Examples:
 
@@ -106,7 +105,7 @@ def macro(keyword: str, boj_dataset: str | None, as_json: bool) -> None:
     """
     from japanfinance_agent.analysis import macro_snapshot
 
-    result = asyncio.run(macro_snapshot(keyword=keyword, boj_dataset=boj_dataset))
+    result = asyncio.run(macro_snapshot(keyword=keyword))
 
     if as_json:
         click.echo(json.dumps(result, ensure_ascii=False, indent=2, default=str))

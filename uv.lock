@@ -114,23 +114,6 @@ wheels = [
 ]
 
 [[package]]
-name = "boj-mcp"
-version = "0.1.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "click" },
-    { name = "fastmcp" },
-    { name = "httpx" },
-    { name = "loguru" },
-    { name = "polars" },
-    { name = "pydantic" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/fb/35/88f32109b6839ce9f0a71b72ccf54483beadef2cc5ab0b1f0cd1e474580a/boj_mcp-0.1.1.tar.gz", hash = "sha256:73bff5f3acaa27bb6acb8484a3b439999e0078220f7f50d71509ab8403bc463a", size = 156870, upload-time = "2026-02-14T11:42:08.601Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/58/4c/53ba2a5a98fb6b97fc4fd0f8681718feb552814b824959582ffbdd4ec03d/boj_mcp-0.1.1-py3-none-any.whl", hash = "sha256:14ce59eb4c1bebd6d1e5aac414410efc772d473c7efe76627658fe2c247e5824", size = 17492, upload-time = "2026-02-14T11:42:06.537Z" },
-]
-
-[[package]]
 name = "cachetools"
 version = "7.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -841,7 +824,7 @@ wheels = [
 
 [[package]]
 name = "japanfinance-agent"
-version = "0.1.6"
+version = "0.1.7"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -853,17 +836,12 @@ dependencies = [
 
 [package.optional-dependencies]
 all = [
-    { name = "boj-mcp" },
     { name = "edinet-mcp" },
     { name = "estat-mcp" },
     { name = "stockprice-mcp" },
     { name = "tdnet-disclosure-mcp" },
 ]
-boj = [
-    { name = "boj-mcp" },
-]
 dev = [
-    { name = "boj-mcp" },
     { name = "edinet-mcp" },
     { name = "estat-mcp" },
     { name = "mypy" },
@@ -889,9 +867,6 @@ tdnet = [
 
 [package.metadata]
 requires-dist = [
-    { name = "boj-mcp", marker = "extra == 'all'", specifier = ">=0.1.0" },
-    { name = "boj-mcp", marker = "extra == 'boj'", specifier = ">=0.1.0" },
-    { name = "boj-mcp", marker = "extra == 'dev'", specifier = ">=0.1.0" },
     { name = "click", specifier = ">=8.0" },
     { name = "edinet-mcp", marker = "extra == 'all'", specifier = ">=0.6.0" },
     { name = "edinet-mcp", marker = "extra == 'dev'", specifier = ">=0.6.0" },
@@ -915,7 +890,7 @@ requires-dist = [
     { name = "tdnet-disclosure-mcp", marker = "extra == 'dev'", specifier = ">=0.1.0" },
     { name = "tdnet-disclosure-mcp", marker = "extra == 'tdnet'", specifier = ">=0.1.0" },
 ]
-provides-extras = ["edinet", "tdnet", "estat", "boj", "stock", "all", "dev"]
+provides-extras = ["edinet", "tdnet", "estat", "stock", "all", "dev"]
 
 [[package]]
 name = "jaraco-classes"

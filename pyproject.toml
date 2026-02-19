@@ -1,13 +1,13 @@
 [project]
 name = "japanfinance-agent"
-version = "0.1.6"
-description = "Compound MCP agent combining Japan finance data sources — EDINET, TDNET, e-Stat, BOJ, stock prices"
+version = "0.1.7"
+description = "Compound MCP agent combining Japan finance data sources — EDINET, TDNET, e-Stat, stock prices"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
 keywords = [
     "japan", "finance", "mcp", "agent", "edinet", "tdnet", "estat",
-    "boj", "stock", "xbrl", "financial-data",
+    "stock", "xbrl", "financial-data",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -33,20 +33,17 @@ dependencies = [
 edinet = ["edinet-mcp>=0.6.0"]
 tdnet = ["tdnet-disclosure-mcp>=0.1.0"]
 estat = ["estat-mcp>=0.2.1"]
-boj = ["boj-mcp>=0.1.0"]
 stock = ["stockprice-mcp>=0.1.0"]
 all = [
     "edinet-mcp>=0.6.0",
     "tdnet-disclosure-mcp>=0.1.0",
     "estat-mcp>=0.2.1",
-    "boj-mcp>=0.1.0",
     "stockprice-mcp>=0.1.0",
 ]
 dev = [
     "edinet-mcp>=0.6.0",
     "tdnet-disclosure-mcp>=0.1.0",
     "estat-mcp>=0.2.1",
-    "boj-mcp>=0.1.0",
     "stockprice-mcp>=0.1.0",
     "pytest>=8.0",
     "pytest-asyncio>=0.23",

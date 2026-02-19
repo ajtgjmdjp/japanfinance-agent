@@ -1,7 +1,7 @@
 """japanfinance-agent: Compound MCP agent for Japan finance data.
 
 Combines EDINET (securities filings), TDNET (disclosures),
-e-Stat (government statistics), BOJ (central bank), and stock prices
+e-Stat (government statistics), and stock prices
 into high-value compound analysis tools.
 """
 
@@ -25,4 +25,4 @@ __all__ = [
     "macro_snapshot",
 ]
 
-__version__ = "0.1.6"
+__version__ = "0.1.7"

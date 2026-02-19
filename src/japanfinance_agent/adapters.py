@@ -245,36 +245,6 @@ async def get_estat_data(
 
 
 # ---------------------------------------------------------------------------
-# BOJ adapter
-# ---------------------------------------------------------------------------
-
-
-async def get_boj_dataset(name: str) -> dict[str, Any] | None:
-    """Fetch a BOJ dataset."""
-    if not _is_available("boj_mcp"):
-        logger.debug("boj-mcp not installed, skipping")
-        return None
-
-    from boj_mcp.client import BojClient
-
-    try:
-        async with BojClient() as client:
-            df = await client.get_dataset(name)
-            info = client.get_dataframe_info(df, name)
-            return {
-                "source": "boj",
-                "name": name,
-                "shape": info.shape,
-                "columns": info.columns,
-                "date_range": info.date_range,
-                "sample": df.tail(5).to_dicts(),
-            }
-    except Exception as e:
-        logger.warning(f"BOJ fetch failed for {name}: {e}")
-        return None
-
-
-# ---------------------------------------------------------------------------
 # Availability check
 # ---------------------------------------------------------------------------
 
@@ -285,7 +255,6 @@ def check_available_sources() -> dict[str, bool]:
         "edinet": "edinet_mcp",
         "tdnet": "tdnet_disclosure_mcp",
         "estat": "estat_mcp",
-        "boj": "boj_mcp",
         "stock": "yfinance_mcp",
     }
     return {name: _is_available(pkg) for name, pkg in sources.items()}
@@ -311,7 +280,7 @@ async def test_connections() -> dict[str, str]:
             elif source == "estat":
                 tables = await get_estat_data("GDP", limit=1)
                 results[source] = f"ok ({len(tables)} results)"
-            elif source == "boj" or source == "stock":
+            elif source == "stock":
                 results[source] = "ok (installed)"
         except Exception as e:
             results[source] = f"error: {e}"

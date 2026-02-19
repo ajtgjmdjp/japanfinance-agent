@@ -124,8 +124,6 @@ class TestCliMacro:
         new_callable=AsyncMock,
         return_value=MacroSnapshot(
             estat_data=[],
-            boj_data=None,
-            news=[],
             sources_used=[],
         ),
     )

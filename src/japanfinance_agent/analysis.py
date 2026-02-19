@@ -40,7 +40,6 @@ class MacroSnapshot(TypedDict):
     """Result of macro_snapshot."""
 
     estat_data: list[dict[str, Any]]
-    boj_data: dict[str, Any] | None
     sources_used: list[str]
 
 
@@ -153,14 +152,12 @@ async def analyze_company(
 async def macro_snapshot(
     *,
     keyword: str = "GDP",
-    boj_dataset: str | None = None,
     estat_limit: int = 5,
 ) -> MacroSnapshot:
-    """Macro economic snapshot combining e-Stat + BOJ.
+    """Macro economic snapshot from e-Stat government statistics.
 
     Args:
         keyword: e-Stat search keyword (e.g. "GDP", "CPI", "雇用").
-        boj_dataset: Optional BOJ dataset name to fetch.
         estat_limit: Max e-Stat tables.
 
     Returns:
@@ -168,17 +165,12 @@ async def macro_snapshot(
     """
     sources_used: list[str] = []
 
-    tasks: dict[str, Any] = {
-        "estat": _with_timeout(adapters.get_estat_data(keyword, limit=estat_limit)),
-    }
-    if boj_dataset:
-        tasks["boj"] = _with_timeout(adapters.get_boj_dataset(boj_dataset))
+    try:
+        raw_estat = await _with_timeout(adapters.get_estat_data(keyword, limit=estat_limit))
+    except Exception as e:
+        logger.warning(f"e-Stat error: {e}")
+        raw_estat = []
 
-    keys = list(tasks.keys())
-    results_list = await asyncio.gather(*tasks.values(), return_exceptions=True)
-    results = dict(zip(keys, results_list, strict=True))
-
-    raw_estat = results.get("estat", [])
     estat_data: list[dict[str, Any]] = []
     if isinstance(raw_estat, BaseException):
         logger.warning(f"e-Stat error: {raw_estat}")
@@ -187,17 +179,8 @@ async def macro_snapshot(
     if estat_data:
         sources_used.append("estat")
 
-    raw_boj = results.get("boj")
-    boj_data: dict[str, Any] | None = None
-    if isinstance(raw_boj, BaseException):
-        logger.warning(f"BOJ error: {raw_boj}")
-    elif raw_boj is not None:
-        boj_data = cast("dict[str, Any]", raw_boj)
-        sources_used.append("boj")
-
     return MacroSnapshot(
         estat_data=estat_data,
-        boj_data=boj_data,
         sources_used=sources_used,
     )
 

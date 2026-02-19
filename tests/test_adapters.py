@@ -26,7 +26,6 @@ class TestCheckAvailableSources:
         assert "edinet" in result
         assert "tdnet" in result
         assert "estat" in result
-        assert "boj" in result
         assert "stock" in result
 
     def test_all_bool_values(self) -> None:
@@ -110,18 +109,6 @@ class TestEstatAdapter:
         assert result == []
 
 
-class TestBojAdapter:
-    """Test BOJ adapter functions."""
-
-    @patch.object(adapters, "_is_available", return_value=False)
-    async def test_get_boj_dataset_not_installed(
-        self,
-        mock_avail: MagicMock,
-    ) -> None:
-        result = await adapters.get_boj_dataset("rates")
-        assert result is None
-
-
 class TestTestConnections:
     """Test the connectivity check."""
 
@@ -134,7 +121,6 @@ class TestTestConnections:
             "edinet": False,
             "tdnet": False,
             "estat": False,
-            "boj": False,
             "stock": False,
         }
         results = await adapters.test_connections()

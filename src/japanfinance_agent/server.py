@@ -34,7 +34,7 @@ mcp = FastMCP(
     "japanfinance-agent",
     instructions=(
         "Compound analysis tools for Japanese financial data. "
-        "Combines EDINET, TDNET, e-Stat, BOJ, and stock price data."
+        "Combines EDINET, TDNET, e-Stat, and stock price data."
     ),
 )
 
@@ -76,15 +76,13 @@ async def analyze_japanese_company(
 @mcp.tool()
 async def get_macro_snapshot(
     keyword: str = "GDP",
-    boj_dataset: str | None = None,
 ) -> str:
     """Macro economic snapshot for Japan.
 
-    Combines e-Stat government statistics and BOJ data.
+    Searches e-Stat government statistics for the given keyword.
 
     Args:
         keyword: Search keyword for e-Stat (e.g. "GDP", "CPI", "雇用", "物価").
-        boj_dataset: Optional BOJ dataset name.
     """
     if not keyword or not keyword.strip():
         return json.dumps({"error": "keyword must not be empty"})
@@ -92,7 +90,7 @@ async def get_macro_snapshot(
         return json.dumps({"error": f"keyword too long: {len(keyword)} chars (max 200)"})
 
     logger.info(f"Macro snapshot: keyword={keyword}")
-    result = await macro_snapshot(keyword=keyword, boj_dataset=boj_dataset)
+    result = await macro_snapshot(keyword=keyword)
     return json.dumps(result, ensure_ascii=False, indent=2, default=str)
 
 

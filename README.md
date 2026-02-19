@@ -5,9 +5,9 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Compound [MCP](https://modelcontextprotocol.io/) agent that combines **6 Japan finance data sources** into high-value analysis tools. Instead of calling each source individually, get comprehensive company analysis, macro snapshots, and earnings monitoring in a single request.
+Compound [MCP](https://modelcontextprotocol.io/) agent that combines **Japan finance data sources** into high-value analysis tools. Instead of calling each source individually, get comprehensive company analysis, macro snapshots, and earnings monitoring in a single request.
 
-Part of the [Japan Finance Data Stack](https://github.com/ajtgjmdjp/awesome-japan-finance-data): [edinet-mcp](https://github.com/ajtgjmdjp/edinet-mcp) (securities filings) | [tdnet-disclosure-mcp](https://github.com/ajtgjmdjp/tdnet-disclosure-mcp) (timely disclosures) | [estat-mcp](https://github.com/ajtgjmdjp/estat-mcp) (government statistics) | [boj-mcp](https://github.com/ajtgjmdjp/boj-mcp) (Bank of Japan) | [japan-news-mcp](https://github.com/ajtgjmdjp/japan-news-mcp) (financial news) | [stockprice-mcp](https://github.com/ajtgjmdjp/stockprice-mcp) (stock prices)
+Part of the [Japan Finance Data Stack](https://github.com/ajtgjmdjp/awesome-japan-finance-data): [edinet-mcp](https://github.com/ajtgjmdjp/edinet-mcp) (securities filings) | [tdnet-disclosure-mcp](https://github.com/ajtgjmdjp/tdnet-disclosure-mcp) (timely disclosures) | [estat-mcp](https://github.com/ajtgjmdjp/estat-mcp) (government statistics) | [stockprice-mcp](https://github.com/ajtgjmdjp/stockprice-mcp) (stock prices)
 
 ## Why?
 
@@ -15,8 +15,8 @@ Each Japan finance MCP provides focused data from one source. But real analysis 
 
 | What you want | Without japanfinance-agent | With japanfinance-agent |
 |---|---|---|
-| Company analysis | 4 sequential MCP calls (EDINET → TDNET → news → stock) | `analyze 7203` |
-| Macro overview | 3 sequential MCP calls (e-Stat → BOJ → news) | `macro -k GDP` |
+| Company analysis | 3 sequential MCP calls (EDINET → TDNET → stock) | `analyze 7203` |
+| Macro overview | e-Stat search + result aggregation | `macro -k GDP` |
 | Earnings watchlist | N × TDNET calls for N companies | `monitor 7203 6758 6861` |
 
 ## Installation
@@ -32,7 +32,7 @@ pip install "japanfinance-agent[all]"
 pip install "japanfinance-agent[edinet,tdnet,news]"
 ```
 
-Available extras: `edinet`, `tdnet`, `estat`, `boj`, `news`, `stock`, `all`
+Available extras: `edinet`, `tdnet`, `estat`, `stock`, `all`
 
 ## Configuration
 
@@ -59,19 +59,19 @@ Then ask: "トヨタの財務分析をして" or "日本のGDP関連の最新デ
 
 | Tool | Description |
 |------|-------------|
-| `analyze_japanese_company` | 企業の包括分析（EDINET財務 + TDNET開示 + ニュース + 株価） |
-| `get_macro_snapshot` | マクロ経済スナップショット（e-Stat + BOJ + ニュース） |
+| `analyze_japanese_company` | 企業の包括分析（EDINET財務 + TDNET開示 + 株価） |
+| `get_macro_snapshot` | マクロ経済スナップショット（e-Stat 政府統計） |
 | `monitor_earnings` | 複数企業の決算・開示モニタリング |
 | `check_data_sources` | データソースの接続状況を確認 |
 
 ## CLI Usage
 
 ```bash
-# Analyze a company (EDINET + TDNET + news + stock)
+# Analyze a company (EDINET + TDNET + stock)
 japanfinance-agent analyze 7203
 japanfinance-agent analyze 7203 -e E02144 -p 2025 --json-output
 
-# Macro economic snapshot (e-Stat + BOJ + news)
+# Macro economic snapshot (e-Stat)
 japanfinance-agent macro
 japanfinance-agent macro -k CPI
 
@@ -89,8 +89,8 @@ japanfinance-agent serve
 
 ```
 japanfinance-agent
-├── analyze_company(code)     → EDINET + TDNET + news + stock (parallel)
-├── macro_snapshot(keyword)   → e-Stat + BOJ + news (parallel)
+├── analyze_company(code)     → EDINET + TDNET + stock (parallel)
+├── macro_snapshot(keyword)   → e-Stat government statistics
 ├── earnings_monitor(codes[]) → TDNET × N companies (parallel)
 └── check_data_sources()      → connectivity status
 
@@ -98,8 +98,6 @@ Adapters (graceful degradation — missing packages return empty results):
 ├── edinet-mcp    → Financial statements, metrics, company search
 ├── tdnet-mcp     → Timely disclosures (earnings, dividends, buybacks)
 ├── estat-mcp     → Government statistics (GDP, CPI, employment)
-├── boj-mcp       → Bank of Japan data (rates, money supply)
-├── japan-news-mcp → Financial news headlines
 └── stockprice-mcp → Stock prices & FX (via yfinance)
 ```
 
@@ -110,7 +108,7 @@ Adapters (graceful degradation — missing packages return empty results):
 | [EDINET](https://disclosure.edinet-fsa.go.jp/) | API key (free) | Securities filings, XBRL financial statements |
 | [TDNET](https://www.release.tdnet.info/) | None | Timely disclosures (earnings, dividends) |
 | [e-Stat](https://www.e-stat.go.jp/) | App ID (free) | Government statistics (GDP, CPI, employment) |
-| [BOJ](https://www.stat-search.boj.or.jp/) | None | Central bank data (rates, money supply) |
+| [yfinance](https://github.com/ranaroussi/yfinance) | None | Stock prices & market data |
 
 ## License
 
