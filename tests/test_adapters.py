@@ -28,7 +28,7 @@ class TestCheckAvailableSources:
         assert "estat" in result
         assert "boj" in result
         assert "news" in result
-        assert "jquants" in result
+        assert "stock" in result
 
     def test_all_bool_values(self) -> None:
         result = adapters.check_available_sources()
@@ -149,7 +149,7 @@ class TestTestConnections:
             "estat": False,
             "boj": False,
             "news": False,
-            "jquants": False,
+            "stock": False,
         }
         results = await adapters.test_connections()
         assert all(v == "not installed" for v in results.values())

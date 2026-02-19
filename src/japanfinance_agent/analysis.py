@@ -156,7 +156,7 @@ async def analyze_company(
         logger.warning(f"Stock price error: {raw_stock}")
     elif raw_stock is not None:
         stock_price = cast("dict[str, Any]", raw_stock)
-        sources_used.append("jquants")
+        sources_used.append("yfinance")
 
     return CompanyAnalysis(
         code=code,

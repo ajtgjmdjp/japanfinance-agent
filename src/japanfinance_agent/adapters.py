@@ -1,7 +1,7 @@
 """Adapter layer for Japan finance MCP data sources.
 
 Each adapter wraps a client from one of the 6 MCP packages (edinet-mcp,
-tdnet-disclosure-mcp, estat-mcp, boj-mcp, japan-news-mcp, jquants-mcp).
+tdnet-disclosure-mcp, estat-mcp, boj-mcp, japan-news-mcp, stockprice-mcp).
 
 All adapters gracefully handle missing packages — if a package is not installed,
 the adapter returns None or empty results instead of raising ImportError.
@@ -213,40 +213,40 @@ async def get_stock_price(
     start_date: date | None = None,
     end_date: date | None = None,
 ) -> dict[str, Any] | None:
-    """Fetch stock price data from J-Quants."""
-    if not _is_available("jquants_mcp"):
-        logger.debug("jquants-mcp not installed, skipping")
+    """Fetch stock price data via yfinance (stockprice-mcp)."""
+    if not _is_available("yfinance_mcp"):
+        logger.debug("stockprice-mcp not installed, skipping")
         return None
 
-    from jquants_mcp.client import JQuantsClient
+    from yfinance_mcp.client import YfinanceClient
 
-    client = JQuantsClient()
+    client = YfinanceClient()
     try:
         result = await client.get_stock_price(
             code,
             start_date=start_date,
             end_date=end_date,
         )
-        prices = result.prices
-        if not prices:
+        if result is None:
             return None
-        latest = prices[-1]
         return {
-            "source": "jquants",
-            "code": code,
-            "date": str(latest.date),
-            "close": latest.close,
-            "open": latest.open,
-            "high": latest.high,
-            "low": latest.low,
-            "volume": latest.volume,
-            "total_points": len(prices),
+            "source": "yfinance",
+            "code": result.code,
+            "date": result.date,
+            "close": result.close,
+            "open": result.open,
+            "high": result.high,
+            "low": result.low,
+            "volume": result.volume,
+            "week52_high": result.week52_high,
+            "week52_low": result.week52_low,
+            "trailing_pe": result.trailing_pe,
+            "price_to_book": result.price_to_book,
+            "market_cap": result.market_cap,
         }
     except Exception as e:
-        logger.warning(f"J-Quants fetch failed for {code}: {e}")
+        logger.warning(f"yfinance fetch failed for {code}: {e}")
         return None
-    finally:
-        await client.close()
 
 
 # ---------------------------------------------------------------------------
@@ -327,7 +327,7 @@ def check_available_sources() -> dict[str, bool]:
         "estat": "estat_mcp",
         "boj": "boj_mcp",
         "news": "japan_news_mcp",
-        "jquants": "jquants_mcp",
+        "stock": "yfinance_mcp",
     }
     return {name: _is_available(pkg) for name, pkg in sources.items()}
 
@@ -355,7 +355,7 @@ async def test_connections() -> dict[str, str]:
             elif source == "estat":
                 tables = await get_estat_data("GDP", limit=1)
                 results[source] = f"ok ({len(tables)} results)"
-            elif source == "boj" or source == "jquants":
+            elif source == "boj" or source == "stock":
                 results[source] = "ok (installed)"
         except Exception as e:
             results[source] = f"error: {e}"

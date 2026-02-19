@@ -7,7 +7,7 @@
 
 Compound [MCP](https://modelcontextprotocol.io/) agent that combines **6 Japan finance data sources** into high-value analysis tools. Instead of calling each source individually, get comprehensive company analysis, macro snapshots, and earnings monitoring in a single request.
 
-Part of the [Japan Finance Data Stack](https://github.com/ajtgjmdjp/awesome-japan-finance-data): [edinet-mcp](https://github.com/ajtgjmdjp/edinet-mcp) (securities filings) | [tdnet-disclosure-mcp](https://github.com/ajtgjmdjp/tdnet-disclosure-mcp) (timely disclosures) | [estat-mcp](https://github.com/ajtgjmdjp/estat-mcp) (government statistics) | [boj-mcp](https://github.com/ajtgjmdjp/boj-mcp) (Bank of Japan) | [japan-news-mcp](https://github.com/ajtgjmdjp/japan-news-mcp) (financial news) | [jquants-mcp](https://github.com/ajtgjmdjp/jquants-mcp) (stock prices)
+Part of the [Japan Finance Data Stack](https://github.com/ajtgjmdjp/awesome-japan-finance-data): [edinet-mcp](https://github.com/ajtgjmdjp/edinet-mcp) (securities filings) | [tdnet-disclosure-mcp](https://github.com/ajtgjmdjp/tdnet-disclosure-mcp) (timely disclosures) | [estat-mcp](https://github.com/ajtgjmdjp/estat-mcp) (government statistics) | [boj-mcp](https://github.com/ajtgjmdjp/boj-mcp) (Bank of Japan) | [japan-news-mcp](https://github.com/ajtgjmdjp/japan-news-mcp) (financial news) | [stockprice-mcp](https://github.com/ajtgjmdjp/stockprice-mcp) (stock prices)
 
 ## Why?
 
@@ -32,7 +32,7 @@ pip install "japanfinance-agent[all]"
 pip install "japanfinance-agent[edinet,tdnet,news]"
 ```
 
-Available extras: `edinet`, `tdnet`, `estat`, `boj`, `news`, `jquants`, `all`
+Available extras: `edinet`, `tdnet`, `estat`, `boj`, `news`, `stock`, `all`
 
 ## Configuration
 
@@ -100,7 +100,7 @@ Adapters (graceful degradation — missing packages return empty results):
 ├── estat-mcp     → Government statistics (GDP, CPI, employment)
 ├── boj-mcp       → Bank of Japan data (rates, money supply)
 ├── japan-news-mcp → Financial news headlines
-└── jquants-mcp   → Stock prices (OHLCV)
+└── stockprice-mcp → Stock prices & FX (via yfinance)
 ```
 
 ## Data Sources
@@ -112,7 +112,6 @@ Adapters (graceful degradation — missing packages return empty results):
 | [e-Stat](https://www.e-stat.go.jp/) | App ID (free) | Government statistics (GDP, CPI, employment) |
 | [BOJ](https://www.stat-search.boj.or.jp/) | None | Central bank data (rates, money supply) |
 | [News](https://news.yahoo.co.jp/categories/business) | None | RSS feeds (Yahoo, NHK, Reuters, Toyo Keizai) |
-| [J-Quants](https://jpx-jquants.com/) | Email + Password | Stock prices, financials, earnings calendar |
 
 ## License
 
