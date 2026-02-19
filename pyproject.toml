@@ -1,7 +1,7 @@
 [project]
 name = "japanfinance-agent"
-version = "0.1.4"
-description = "Compound MCP agent combining 6 Japan finance data sources — EDINET, TDNET, e-Stat, BOJ, news, stock prices"
+version = "0.1.5"
+description = "Compound MCP agent combining Japan finance data sources — EDINET, TDNET, e-Stat, BOJ, stock prices"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"

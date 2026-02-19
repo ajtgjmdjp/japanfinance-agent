@@ -86,18 +86,6 @@ class TestTdnetAdapter:
         assert result == []
 
 
-class TestNewsAdapter:
-    """Test news adapter functions."""
-
-    @patch.object(adapters, "_is_available", return_value=False)
-    async def test_get_news_not_installed(
-        self,
-        mock_avail: MagicMock,
-    ) -> None:
-        result = await adapters.get_news("トヨタ")
-        assert result == []
-
-
 class TestStockPriceAdapter:
     """Test stock price adapter functions."""
 

@@ -1,6 +1,6 @@
 """Adapter layer for Japan finance MCP data sources.
 
-Each adapter wraps a client from one of the 6 MCP packages (edinet-mcp,
+Each adapter wraps a client from one of the MCP packages (edinet-mcp,
 tdnet-disclosure-mcp, estat-mcp, boj-mcp, stockprice-mcp).
 
 All adapters gracefully handle missing packages — if a package is not installed,
@@ -164,20 +164,6 @@ async def get_latest_disclosures(limit: int = 20) -> list[dict[str, Any]]:
 
 
 # ---------------------------------------------------------------------------
-# News adapter (removed — returns empty list)
-# ---------------------------------------------------------------------------
-
-
-async def get_news(
-    query: str | None = None,
-    *,
-    limit: int = 10,
-) -> list[dict[str, Any]]:
-    """Fetch financial news headlines. (News source removed — returns empty list.)"""
-    return []
-
-
-# ---------------------------------------------------------------------------
 # Stock price adapter
 # ---------------------------------------------------------------------------
 
@@ -323,9 +309,6 @@ async def test_connections() -> dict[str, str]:
             elif source == "tdnet":
                 disclosures = await get_latest_disclosures(limit=1)
                 results[source] = f"ok ({len(disclosures)} results)"
-            elif source == "news":
-                articles = await get_news(limit=1)
-                results[source] = f"ok ({len(articles)} results)"
             elif source == "estat":
                 tables = await get_estat_data("GDP", limit=1)
                 results[source] = f"ok ({len(tables)} results)"

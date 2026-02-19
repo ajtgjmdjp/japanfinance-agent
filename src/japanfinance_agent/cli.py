@@ -36,7 +36,7 @@ def _validate_codes(
 @click.group()
 @click.option("--verbose", "-v", is_flag=True, help="Enable debug logging.")
 def cli(verbose: bool) -> None:
-    """Japan Finance Agent — compound analysis from 6 data sources."""
+    """Japan Finance Agent — compound analysis from multiple data sources."""
     level = "DEBUG" if verbose else "INFO"
     logger.remove()
     logger.add(sys.stderr, level=level, format="{time:HH:mm:ss} | {level:<7} | {message}")
@@ -48,7 +48,7 @@ def cli(verbose: bool) -> None:
 @click.option("--period", "-p", default=None, help="Filing year (e.g. 2025).")
 @click.option("--json-output", "-j", "as_json", is_flag=True, help="Output as JSON.")
 def analyze(code: str, edinet_code: str | None, period: str | None, as_json: bool) -> None:
-    """Analyze a company (EDINET + TDNET + news + stock).
+    """Analyze a company (EDINET + TDNET + stock).
 
     Examples:
 
@@ -90,19 +90,13 @@ def analyze(code: str, edinet_code: str | None, period: str | None, as_json: boo
         click.echo(f"  Date: {sp['date']}, Close: {sp['close']}")
         click.echo()
 
-    if result["news"]:
-        click.echo(f"--- News ({len(result['news'])}) ---")
-        for n in result["news"][:3]:
-            click.echo(f"  {n['title']}")
-            click.echo(f"    {n.get('source_name', '')} {n.get('published', '')}")
-
 
 @cli.command()
 @click.option("--keyword", "-k", default="GDP", help="e-Stat search keyword.")
 @click.option("--boj-dataset", "-b", default=None, help="BOJ dataset name.")
 @click.option("--json-output", "-j", "as_json", is_flag=True, help="Output as JSON.")
 def macro(keyword: str, boj_dataset: str | None, as_json: bool) -> None:
-    """Macro economic snapshot (e-Stat + BOJ + news).
+    """Macro economic snapshot (e-Stat + BOJ).
 
     Examples:
 
@@ -126,11 +120,6 @@ def macro(keyword: str, boj_dataset: str | None, as_json: bool) -> None:
         for t in result["estat_data"]:
             click.echo(f"  [{t['stats_id']}] {t['title']}")
         click.echo()
-
-    if result["news"]:
-        click.echo(f"--- News ({len(result['news'])}) ---")
-        for n in result["news"][:5]:
-            click.echo(f"  {n['title']}")
 
 
 @cli.command()

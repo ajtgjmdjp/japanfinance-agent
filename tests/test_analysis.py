@@ -16,7 +16,6 @@ class TestAnalyzeCompany:
     """Test analyze_company compound tool."""
 
     @patch.object(adapters, "get_stock_price", new_callable=AsyncMock, return_value=None)
-    @patch.object(adapters, "get_news", new_callable=AsyncMock, return_value=[])
     @patch.object(
         adapters,
         "get_company_disclosures",
@@ -57,7 +56,6 @@ class TestAnalyzeCompany:
         mock_search: AsyncMock,
         mock_stmt: AsyncMock,
         mock_disc: AsyncMock,
-        mock_news: AsyncMock,
         mock_stock: AsyncMock,
     ) -> None:
         result = await analyze_company("7203")
@@ -71,7 +69,6 @@ class TestAnalyzeCompany:
         assert len(result["disclosures"]) == 1
 
     @patch.object(adapters, "get_stock_price", new_callable=AsyncMock, return_value=None)
-    @patch.object(adapters, "get_news", new_callable=AsyncMock, return_value=[])
     @patch.object(
         adapters,
         "get_company_disclosures",
@@ -88,7 +85,6 @@ class TestAnalyzeCompany:
         self,
         mock_search: AsyncMock,
         mock_disc: AsyncMock,
-        mock_news: AsyncMock,
         mock_stock: AsyncMock,
     ) -> None:
         result = await analyze_company("9999")
@@ -99,7 +95,6 @@ class TestAnalyzeCompany:
         assert result["sources_used"] == []
 
     @patch.object(adapters, "get_stock_price", new_callable=AsyncMock, return_value=None)
-    @patch.object(adapters, "get_news", new_callable=AsyncMock, return_value=[])
     @patch.object(
         adapters,
         "get_company_disclosures",
@@ -116,7 +111,6 @@ class TestAnalyzeCompany:
         self,
         mock_stmt: AsyncMock,
         mock_disc: AsyncMock,
-        mock_news: AsyncMock,
         mock_stock: AsyncMock,
     ) -> None:
         result = await analyze_company("7203", edinet_code="E02144")
@@ -129,12 +123,6 @@ class TestAnalyzeCompany:
         "get_stock_price",
         new_callable=AsyncMock,
         side_effect=Exception("API error"),
-    )
-    @patch.object(
-        adapters,
-        "get_news",
-        new_callable=AsyncMock,
-        side_effect=Exception("News error"),
     )
     @patch.object(
         adapters,
@@ -152,7 +140,6 @@ class TestAnalyzeCompany:
         self,
         mock_search: AsyncMock,
         mock_disc: AsyncMock,
-        mock_news: AsyncMock,
         mock_stock: AsyncMock,
     ) -> None:
         result = await analyze_company("7203")
@@ -166,42 +153,29 @@ class TestMacroSnapshot:
 
     @patch.object(
         adapters,
-        "get_news",
-        new_callable=AsyncMock,
-        return_value=[{"source": "news", "title": "GDP growth strong"}],
-    )
-    @patch.object(
-        adapters,
         "get_estat_data",
         new_callable=AsyncMock,
         return_value=[{"source": "estat", "stats_id": "001", "title": "GDP"}],
     )
-    async def test_macro_with_estat_and_news(
+    async def test_macro_with_estat(
         self,
         mock_estat: AsyncMock,
-        mock_news: AsyncMock,
     ) -> None:
         result = await macro_snapshot(keyword="GDP")
 
         assert "estat" in result["sources_used"]
-        assert "news" in result["sources_used"]
         assert len(result["estat_data"]) == 1
-        assert len(result["news"]) == 1
 
-    @patch.object(adapters, "get_news", new_callable=AsyncMock, return_value=[])
     @patch.object(adapters, "get_estat_data", new_callable=AsyncMock, return_value=[])
     async def test_macro_no_data(
         self,
         mock_estat: AsyncMock,
-        mock_news: AsyncMock,
     ) -> None:
         result = await macro_snapshot()
 
         assert result["sources_used"] == []
         assert result["estat_data"] == []
-        assert result["news"] == []
 
-    @patch.object(adapters, "get_news", new_callable=AsyncMock, return_value=[])
     @patch.object(adapters, "get_estat_data", new_callable=AsyncMock, return_value=[])
     @patch.object(
         adapters,
@@ -213,7 +187,6 @@ class TestMacroSnapshot:
         self,
         mock_boj: AsyncMock,
         mock_estat: AsyncMock,
-        mock_news: AsyncMock,
     ) -> None:
         result = await macro_snapshot(boj_dataset="rates")
 

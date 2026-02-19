@@ -34,7 +34,7 @@ mcp = FastMCP(
     "japanfinance-agent",
     instructions=(
         "Compound analysis tools for Japanese financial data. "
-        "Combines EDINET, TDNET, e-Stat, BOJ, news, and stock price data."
+        "Combines EDINET, TDNET, e-Stat, BOJ, and stock price data."
     ),
 )
 
@@ -47,7 +47,7 @@ async def analyze_japanese_company(
 ) -> str:
     """Comprehensive analysis of a Japanese company.
 
-    Combines EDINET financial statements, TDNET disclosures, financial news,
+    Combines EDINET financial statements, TDNET disclosures,
     and stock price data into a single view.
 
     Args:
@@ -80,7 +80,7 @@ async def get_macro_snapshot(
 ) -> str:
     """Macro economic snapshot for Japan.
 
-    Combines e-Stat government statistics, BOJ data, and financial news.
+    Combines e-Stat government statistics and BOJ data.
 
     Args:
         keyword: Search keyword for e-Stat (e.g. "GDP", "CPI", "雇用", "物価").

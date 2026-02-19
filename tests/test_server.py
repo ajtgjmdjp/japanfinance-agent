@@ -31,7 +31,6 @@ class TestAnalyzeCompanyTool:
         new_callable=AsyncMock,
         return_value=None,
     )
-    @patch.object(adapters, "get_news", new_callable=AsyncMock, return_value=[])
     @patch.object(
         adapters,
         "get_company_disclosures",
@@ -57,7 +56,6 @@ class TestAnalyzeCompanyTool:
         mock_search: AsyncMock,
         mock_stmt: AsyncMock,
         mock_disc: AsyncMock,
-        mock_news: AsyncMock,
         mock_stock: AsyncMock,
     ) -> None:
         result = await analyze_company("7203")
@@ -69,12 +67,10 @@ class TestAnalyzeCompanyTool:
 class TestMacroSnapshotTool:
     """Test get_macro_snapshot tool logic."""
 
-    @patch.object(adapters, "get_news", new_callable=AsyncMock, return_value=[])
     @patch.object(adapters, "get_estat_data", new_callable=AsyncMock, return_value=[])
     async def test_macro_returns_result(
         self,
         mock_estat: AsyncMock,
-        mock_news: AsyncMock,
     ) -> None:
         result = await macro_snapshot()
         data = json.dumps(result, ensure_ascii=False, default=str)

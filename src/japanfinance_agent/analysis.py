@@ -7,7 +7,6 @@ MCP calls if done individually.
 from __future__ import annotations
 
 import asyncio
-import re
 from typing import Any, TypedDict, cast
 
 from loguru import logger
@@ -15,7 +14,6 @@ from loguru import logger
 from japanfinance_agent import adapters
 
 _TASK_TIMEOUT = 15.0  # Per-task timeout in seconds
-_CORP_SUFFIX_RE = re.compile(r"株式会社|㈱|有限会社|合同会社")
 
 
 async def _with_timeout(coro: Any, timeout: float = _TASK_TIMEOUT) -> Any:
@@ -34,7 +32,6 @@ class CompanyAnalysis(TypedDict):
     company_name: str | None
     statements: dict[str, Any] | None
     disclosures: list[dict[str, Any]]
-    news: list[dict[str, Any]]
     stock_price: dict[str, Any] | None
     sources_used: list[str]
 
@@ -44,7 +41,6 @@ class MacroSnapshot(TypedDict):
 
     estat_data: list[dict[str, Any]]
     boj_data: dict[str, Any] | None
-    news: list[dict[str, Any]]
     sources_used: list[str]
 
 
@@ -70,20 +66,18 @@ async def analyze_company(
     *,
     edinet_code: str | None = None,
     period: str | None = None,
-    news_limit: int = 5,
     disclosure_limit: int = 10,
 ) -> CompanyAnalysis:
-    """Comprehensive company analysis combining EDINET + TDNET + news + stock.
+    """Comprehensive company analysis combining EDINET + TDNET + stock.
 
-    Fetches financial statements, recent disclosures, relevant news,
-    and stock price data in parallel.
+    Fetches financial statements, recent disclosures, and stock price data
+    in parallel.
 
     Args:
         code: 4-digit stock code (e.g. "7203").
         edinet_code: Optional EDINET code (e.g. "E02144"). If not provided,
             searches for it using the stock code.
         period: Fiscal period year for EDINET statements.
-        news_limit: Max news articles to fetch.
         disclosure_limit: Max TDNET disclosures to fetch.
 
     Returns:
@@ -110,10 +104,6 @@ async def analyze_company(
     tasks["disclosures"] = _with_timeout(
         adapters.get_company_disclosures(code, limit=disclosure_limit)
     )
-
-    # Search news by shortened company name or code
-    search_term = _CORP_SUFFIX_RE.sub("", company_name).strip() if company_name else code
-    tasks["news"] = _with_timeout(adapters.get_news(search_term, limit=news_limit))
     tasks["stock_price"] = _with_timeout(adapters.get_stock_price(code))
 
     # Run all in parallel (each task has its own timeout)
@@ -141,15 +131,6 @@ async def analyze_company(
         sources_used.append("tdnet")
         company_name = company_name or disclosures[0].get("company_name")
 
-    raw_news = results.get("news", [])
-    news: list[dict[str, Any]] = []
-    if isinstance(raw_news, BaseException):
-        logger.warning(f"News fetch error: {raw_news}")
-    else:
-        news = cast("list[dict[str, Any]]", raw_news)
-    if news:
-        sources_used.append("news")
-
     raw_stock = results.get("stock_price")
     stock_price: dict[str, Any] | None = None
     if isinstance(raw_stock, BaseException):
@@ -164,7 +145,6 @@ async def analyze_company(
         company_name=company_name,
         statements=statements,
         disclosures=disclosures,
-        news=news,
         stock_price=stock_price,
         sources_used=sources_used,
     )
@@ -174,15 +154,13 @@ async def macro_snapshot(
     *,
     keyword: str = "GDP",
     boj_dataset: str | None = None,
-    news_limit: int = 5,
     estat_limit: int = 5,
 ) -> MacroSnapshot:
-    """Macro economic snapshot combining e-Stat + BOJ + news.
+    """Macro economic snapshot combining e-Stat + BOJ.
 
     Args:
         keyword: e-Stat search keyword (e.g. "GDP", "CPI", "雇用").
         boj_dataset: Optional BOJ dataset name to fetch.
-        news_limit: Max news articles.
         estat_limit: Max e-Stat tables.
 
     Returns:
@@ -192,7 +170,6 @@ async def macro_snapshot(
 
     tasks: dict[str, Any] = {
         "estat": _with_timeout(adapters.get_estat_data(keyword, limit=estat_limit)),
-        "news": _with_timeout(adapters.get_news(keyword, limit=news_limit)),
     }
     if boj_dataset:
         tasks["boj"] = _with_timeout(adapters.get_boj_dataset(boj_dataset))
@@ -218,19 +195,9 @@ async def macro_snapshot(
         boj_data = cast("dict[str, Any]", raw_boj)
         sources_used.append("boj")
 
-    raw_news = results.get("news", [])
-    news: list[dict[str, Any]] = []
-    if isinstance(raw_news, BaseException):
-        logger.warning(f"News error: {raw_news}")
-    else:
-        news = cast("list[dict[str, Any]]", raw_news)
-    if news:
-        sources_used.append("news")
-
     return MacroSnapshot(
         estat_data=estat_data,
         boj_data=boj_data,
-        news=news,
         sources_used=sources_used,
     )
 
