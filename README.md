@@ -111,7 +111,6 @@ Adapters (graceful degradation — missing packages return empty results):
 | [TDNET](https://www.release.tdnet.info/) | None | Timely disclosures (earnings, dividends) |
 | [e-Stat](https://www.e-stat.go.jp/) | App ID (free) | Government statistics (GDP, CPI, employment) |
 | [BOJ](https://www.stat-search.boj.or.jp/) | None | Central bank data (rates, money supply) |
-| [News](https://news.yahoo.co.jp/categories/business) | None | RSS feeds (Yahoo, NHK, Reuters, Toyo Keizai) |
 
 ## License
 
