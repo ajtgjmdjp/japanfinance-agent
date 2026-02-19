@@ -13,7 +13,7 @@ from loguru import logger
 
 from japanfinance_agent import adapters
 
-_TASK_TIMEOUT = 15.0  # Per-task timeout in seconds
+_TASK_TIMEOUT = 90.0  # Per-task timeout in seconds (EDINET XBRL parsing can take 60s+)
 
 
 async def _with_timeout(coro: Any, timeout: float = _TASK_TIMEOUT) -> Any:
