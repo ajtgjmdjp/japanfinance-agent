@@ -88,6 +88,10 @@ strict = true
 packages = ["japanfinance_agent"]
 mypy_path = ["src"]
 
+[[tool.mypy.overrides]]
+module = ["yfinance_mcp", "yfinance_mcp.*", "edinet_mcp", "edinet_mcp.*", "tdnet_disclosure_mcp", "tdnet_disclosure_mcp.*", "estat_mcp", "estat_mcp.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
