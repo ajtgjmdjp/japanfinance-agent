@@ -1,7 +1,7 @@
 """Adapter layer for Japan finance MCP data sources.
 
 Each adapter wraps a client from one of the 6 MCP packages (edinet-mcp,
-tdnet-disclosure-mcp, estat-mcp, boj-mcp, japan-news-mcp, stockprice-mcp).
+tdnet-disclosure-mcp, estat-mcp, boj-mcp, stockprice-mcp).
 
 All adapters gracefully handle missing packages — if a package is not installed,
 the adapter returns None or empty results instead of raising ImportError.
@@ -162,8 +162,9 @@ async def get_latest_disclosures(limit: int = 20) -> list[dict[str, Any]]:
         return []
 
 
+
 # ---------------------------------------------------------------------------
-# News adapter
+# News adapter (removed — returns empty list)
 # ---------------------------------------------------------------------------
 
 
@@ -172,34 +173,8 @@ async def get_news(
     *,
     limit: int = 10,
 ) -> list[dict[str, Any]]:
-    """Fetch financial news headlines."""
-    if not _is_available("japan_news_mcp"):
-        logger.debug("japan-news-mcp not installed, skipping")
-        return []
-
-    from japan_news_mcp.client import NewsClient
-
-    client = NewsClient()
-    try:
-        if query:
-            articles = await client.search(query, limit=limit)
-        else:
-            articles = await client.get_headlines(limit=limit)
-        return [
-            {
-                "source": "news",
-                "title": a.title,
-                "published": str(a.published) if a.published else None,
-                "source_name": a.source_name,
-                "url": a.link,
-            }
-            for a in articles
-        ]
-    except Exception as e:
-        logger.warning(f"News fetch failed: {e}")
-        return []
-    finally:
-        await client.close()
+    """Fetch financial news headlines. (News source removed — returns empty list.)"""
+    return []
 
 
 # ---------------------------------------------------------------------------
@@ -326,7 +301,6 @@ def check_available_sources() -> dict[str, bool]:
         "tdnet": "tdnet_disclosure_mcp",
         "estat": "estat_mcp",
         "boj": "boj_mcp",
-        "news": "japan_news_mcp",
         "stock": "yfinance_mcp",
     }
     return {name: _is_available(pkg) for name, pkg in sources.items()}

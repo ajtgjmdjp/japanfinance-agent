@@ -27,7 +27,6 @@ class TestCheckAvailableSources:
         assert "tdnet" in result
         assert "estat" in result
         assert "boj" in result
-        assert "news" in result
         assert "stock" in result
 
     def test_all_bool_values(self) -> None:
@@ -148,7 +147,6 @@ class TestTestConnections:
             "tdnet": False,
             "estat": False,
             "boj": False,
-            "news": False,
             "stock": False,
         }
         results = await adapters.test_connections()
