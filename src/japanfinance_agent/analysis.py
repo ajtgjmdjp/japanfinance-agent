@@ -60,6 +60,143 @@ class EarningsMonitor(TypedDict):
     sources_used: list[str]
 
 
+def _safe_result(data: dict[str, Any], key: str, label: str) -> Any | None:
+    """Return data[key] if not a BaseException, else log warning and return None."""
+    raw = data.get(key)
+    if isinstance(raw, BaseException):
+        logger.warning(f"{label}: {raw}")
+        return None
+    return raw
+
+
+def _process_statements(
+    data: dict[str, Any], sources_used: list[str]
+) -> tuple[dict[str, Any] | None, str | None]:
+    """Process statements from raw gather results.
+
+    Returns:
+        (statements dict or None, company_name candidate or None).
+    """
+    raw = _safe_result(data, "statements", "Statements fetch error")
+    if raw is None:
+        return None, None
+    statements = cast("dict[str, Any]", raw)
+    sources_used.append("edinet")
+    return statements, statements.get("company_name")
+
+
+def _process_disclosures(
+    data: dict[str, Any], sources_used: list[str]
+) -> tuple[list[dict[str, Any]], str | None]:
+    """Process disclosures from raw gather results.
+
+    Returns:
+        (disclosures list, company_name candidate or None).
+    """
+    raw = _safe_result(data, "disclosures", "Disclosures fetch error")
+    if raw is None:
+        return [], None
+    disclosures = cast("list[dict[str, Any]]", raw)
+    if disclosures:
+        sources_used.append("tdnet")
+        return disclosures, disclosures[0].get("company_name")
+    return disclosures, None
+
+
+def _process_stock_price(
+    data: dict[str, Any], sources_used: list[str]
+) -> dict[str, Any] | None:
+    """Process stock price from raw gather results."""
+    raw = _safe_result(data, "stock_price", "Stock price error")
+    if raw is None:
+        return None
+    stock_price = cast("dict[str, Any]", raw)
+    sources_used.append("yfinance")
+    return stock_price
+
+
+def _build_analysis_report(
+    data: dict[str, Any],
+    *,
+    code: str,
+    edinet_code: str | None,
+    company_name: str | None,
+) -> CompanyAnalysis:
+    """Build CompanyAnalysis from raw gathered results.
+
+    Args:
+        data: Dict mapping source names to gathered results
+            (values may be BaseException from asyncio.gather).
+        code: 4-digit stock code.
+        edinet_code: EDINET code (if resolved).
+        company_name: Company name (if resolved from search).
+
+    Returns:
+        CompanyAnalysis with processed data from all sources.
+    """
+    sources_used: list[str] = []
+
+    statements, stmt_name = _process_statements(data, sources_used)
+    disclosures, disc_name = _process_disclosures(data, sources_used)
+    stock_price = _process_stock_price(data, sources_used)
+
+    company_name = company_name or stmt_name or disc_name
+
+    return CompanyAnalysis(
+        code=code,
+        edinet_code=edinet_code,
+        company_name=company_name,
+        statements=statements,
+        disclosures=disclosures,
+        stock_price=stock_price,
+        sources_used=sources_used,
+    )
+
+
+async def _resolve_edinet_code(
+    code: str, edinet_code: str | None
+) -> tuple[str | None, str | None]:
+    """Resolve EDINET code for a stock code if not already provided.
+
+    Returns:
+        (edinet_code, company_name) — company_name is set only when
+        edinet_code was resolved via search.
+    """
+    if edinet_code is not None:
+        return edinet_code, None
+    companies = await adapters.search_companies_edinet(code)
+    if companies:
+        return companies[0]["edinet_code"], companies[0]["name"]
+    return None, None
+
+
+async def _fetch_all_sources(
+    edinet_code: str | None,
+    code: str,
+    *,
+    period: str | None,
+    disclosure_limit: int,
+) -> dict[str, Any]:
+    """Build and run parallel fetch tasks for all data sources.
+
+    Returns:
+        Dict mapping source names to results (values may be BaseException).
+    """
+    tasks: dict[str, Any] = {}
+    if edinet_code:
+        tasks["statements"] = _with_timeout(
+            adapters.get_company_statements(edinet_code, period=period)
+        )
+    tasks["disclosures"] = _with_timeout(
+        adapters.get_company_disclosures(code, limit=disclosure_limit)
+    )
+    tasks["stock_price"] = _with_timeout(adapters.get_stock_price(code))
+
+    keys = list(tasks.keys())
+    results_list = await asyncio.gather(*tasks.values(), return_exceptions=True)
+    return dict(zip(keys, results_list, strict=True))
+
+
 async def analyze_company(
     code: str,
     *,
@@ -82,70 +219,12 @@ async def analyze_company(
     Returns:
         CompanyAnalysis with data from all available sources.
     """
-    sources_used: list[str] = []
-    company_name: str | None = None
-
-    # Resolve edinet_code if not provided
-    if edinet_code is None:
-        companies = await adapters.search_companies_edinet(code)
-        if companies:
-            edinet_code = companies[0]["edinet_code"]
-            company_name = companies[0]["name"]
-
-    # Parallel fetch from all sources
-    tasks: dict[str, Any] = {}
-
-    if edinet_code:
-        tasks["statements"] = _with_timeout(
-            adapters.get_company_statements(edinet_code, period=period)
-        )
-
-    tasks["disclosures"] = _with_timeout(
-        adapters.get_company_disclosures(code, limit=disclosure_limit)
+    edinet_code, company_name = await _resolve_edinet_code(code, edinet_code)
+    results = await _fetch_all_sources(
+        edinet_code, code, period=period, disclosure_limit=disclosure_limit
     )
-    tasks["stock_price"] = _with_timeout(adapters.get_stock_price(code))
-
-    # Run all in parallel (each task has its own timeout)
-    keys = list(tasks.keys())
-    results_list = await asyncio.gather(*tasks.values(), return_exceptions=True)
-    results = dict(zip(keys, results_list, strict=True))
-
-    # Process results — narrow types from gather's BaseException union
-    raw_stmt = results.get("statements")
-    statements: dict[str, Any] | None = None
-    if isinstance(raw_stmt, BaseException):
-        logger.warning(f"Statements fetch error: {raw_stmt}")
-    elif raw_stmt is not None:
-        statements = cast("dict[str, Any]", raw_stmt)
-        sources_used.append("edinet")
-        company_name = company_name or statements.get("company_name")
-
-    raw_disc = results.get("disclosures", [])
-    disclosures: list[dict[str, Any]] = []
-    if isinstance(raw_disc, BaseException):
-        logger.warning(f"Disclosures fetch error: {raw_disc}")
-    else:
-        disclosures = cast("list[dict[str, Any]]", raw_disc)
-    if disclosures:
-        sources_used.append("tdnet")
-        company_name = company_name or disclosures[0].get("company_name")
-
-    raw_stock = results.get("stock_price")
-    stock_price: dict[str, Any] | None = None
-    if isinstance(raw_stock, BaseException):
-        logger.warning(f"Stock price error: {raw_stock}")
-    elif raw_stock is not None:
-        stock_price = cast("dict[str, Any]", raw_stock)
-        sources_used.append("yfinance")
-
-    return CompanyAnalysis(
-        code=code,
-        edinet_code=edinet_code,
-        company_name=company_name,
-        statements=statements,
-        disclosures=disclosures,
-        stock_price=stock_price,
-        sources_used=sources_used,
+    return _build_analysis_report(
+        results, code=code, edinet_code=edinet_code, company_name=company_name
     )
 
 
@@ -167,7 +246,10 @@ async def macro_snapshot(
 
     try:
         raw_estat = await _with_timeout(adapters.get_estat_data(keyword, limit=estat_limit))
-    except Exception as e:
+    except (OSError, ImportError, ValueError, KeyError, TypeError, AttributeError) as e:
+        # adapters.get_estat_data handles httpx/connection/timeout internally;
+        # OSError covers residual network errors, the rest cover broken installs
+        # and data-format mismatches from the dynamically-imported estat_mcp.
         logger.warning(f"e-Stat error: {e}")
         raw_estat = []
 
@@ -183,6 +265,53 @@ async def macro_snapshot(
         estat_data=estat_data,
         sources_used=sources_used,
     )
+
+
+def _process_single_earnings(
+    code: str, result: Any
+) -> tuple[EarningsEntry, int]:
+    """Process a single company's fetch result into an EarningsEntry.
+
+    Returns:
+        (entry, disclosure_count) tuple.
+    """
+    disclosures: list[dict[str, Any]]
+    if isinstance(result, BaseException):
+        logger.warning(f"Fetch failed for {code}: {result}")
+        disclosures = []
+    else:
+        disclosures = result
+
+    company_name: str | None = None
+    count = 0
+    if disclosures:
+        company_name = disclosures[0].get("company_name")
+        count = len(disclosures)
+
+    entry = EarningsEntry(
+        code=code,
+        company_name=company_name,
+        disclosures=disclosures,
+        metrics=None,
+    )
+    return entry, count
+
+
+def _build_earnings_entries(
+    codes: list[str], results: list[Any]
+) -> tuple[list[EarningsEntry], int]:
+    """Build EarningsEntry list from parallel fetch results.
+
+    Returns:
+        (companies list, total_disclosures count).
+    """
+    companies: list[EarningsEntry] = []
+    total_disclosures = 0
+    for code, result in zip(codes, results, strict=True):
+        entry, count = _process_single_earnings(code, result)
+        companies.append(entry)
+        total_disclosures += count
+    return companies, total_disclosures
 
 
 async def earnings_monitor(
@@ -201,39 +330,15 @@ async def earnings_monitor(
     Returns:
         EarningsMonitor with disclosure data for all companies.
     """
-    sources_used: list[str] = []
-    total_disclosures = 0
-
-    # Fetch disclosures for all companies in parallel (each with timeout)
     task_list = [
         _with_timeout(adapters.get_company_disclosures(code, limit=disclosure_limit))
         for code in codes
     ]
     results = await asyncio.gather(*task_list, return_exceptions=True)
 
-    companies: list[EarningsEntry] = []
-    for code, result in zip(codes, results, strict=True):
-        disclosures: list[dict[str, Any]]
-        if isinstance(result, BaseException):
-            logger.warning(f"Fetch failed for {code}: {result}")
-            disclosures = []
-        else:
-            disclosures = result
+    companies, total_disclosures = _build_earnings_entries(codes, results)
 
-        company_name: str | None = None
-        if disclosures:
-            company_name = disclosures[0].get("company_name")
-            total_disclosures += len(disclosures)
-
-        companies.append(
-            EarningsEntry(
-                code=code,
-                company_name=company_name,
-                disclosures=disclosures,
-                metrics=None,
-            )
-        )
-
+    sources_used: list[str] = []
     if total_disclosures > 0:
         sources_used.append("tdnet")
 

@@ -6,10 +6,77 @@ from unittest.mock import AsyncMock, patch
 
 from japanfinance_agent import adapters
 from japanfinance_agent.analysis import (
+    _build_analysis_report,
     analyze_company,
     earnings_monitor,
     macro_snapshot,
 )
+
+
+class TestBuildAnalysisReport:
+    """Test _build_analysis_report helper (no API calls)."""
+
+    def test_all_sources(self) -> None:
+        data = {
+            "statements": {"source": "edinet", "company_name": "Test Corp"},
+            "disclosures": [{"company_name": "Test Corp", "title": "決算短信"}],
+            "stock_price": {"close": 1500, "currency": "JPY"},
+        }
+        result = _build_analysis_report(
+            data, code="1234", edinet_code="E00001", company_name=None
+        )
+        assert result["code"] == "1234"
+        assert result["edinet_code"] == "E00001"
+        assert result["company_name"] == "Test Corp"
+        assert result["statements"] == data["statements"]
+        assert result["disclosures"] == data["disclosures"]
+        assert result["stock_price"] == data["stock_price"]
+        assert sorted(result["sources_used"]) == ["edinet", "tdnet", "yfinance"]
+
+    def test_empty_data(self) -> None:
+        result = _build_analysis_report(
+            {}, code="9999", edinet_code=None, company_name=None
+        )
+        assert result["code"] == "9999"
+        assert result["statements"] is None
+        assert result["disclosures"] == []
+        assert result["stock_price"] is None
+        assert result["sources_used"] == []
+
+    def test_error_results_skipped(self) -> None:
+        data = {
+            "statements": RuntimeError("EDINET down"),
+            "disclosures": ConnectionError("TDNET down"),
+            "stock_price": TimeoutError("yfinance timeout"),
+        }
+        result = _build_analysis_report(
+            data, code="7203", edinet_code="E02144", company_name="Toyota"
+        )
+        assert result["statements"] is None
+        assert result["disclosures"] == []
+        assert result["stock_price"] is None
+        assert result["sources_used"] == []
+        assert result["company_name"] == "Toyota"
+
+    def test_company_name_from_search_preserved(self) -> None:
+        data = {
+            "statements": {"source": "edinet"},
+            "disclosures": [],
+        }
+        result = _build_analysis_report(
+            data, code="1234", edinet_code="E00001", company_name="From Search"
+        )
+        assert result["company_name"] == "From Search"
+        assert "edinet" in result["sources_used"]
+
+    def test_company_name_fallback_to_disclosures(self) -> None:
+        data = {
+            "disclosures": [{"company_name": "From TDNET"}],
+        }
+        result = _build_analysis_report(
+            data, code="1234", edinet_code=None, company_name=None
+        )
+        assert result["company_name"] == "From TDNET"
 
 
 class TestAnalyzeCompany:

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import httpx
+
 from japanfinance_agent import adapters
 
 
@@ -59,7 +61,7 @@ class TestEdinetAdapter:
         mock_avail: MagicMock,
     ) -> None:
         mock_module = MagicMock()
-        mock_module.EdinetClient.side_effect = Exception("test error")
+        mock_module.EdinetClient.side_effect = httpx.ConnectError("test error")
         with patch.dict("sys.modules", {"edinet_mcp": mock_module}):
             result = await adapters.get_company_statements("E02144")
             assert result is None

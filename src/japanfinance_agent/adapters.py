@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+import httpx
 from loguru import logger
 
 if TYPE_CHECKING:
@@ -72,7 +73,7 @@ async def get_company_statements(
                 "balance_sheet": stmt.balance_sheet.to_dicts()[:20],
                 "metrics": metrics,
             }
-    except Exception as e:
+    except (httpx.HTTPError, ConnectionError, TimeoutError) as e:
         logger.warning(f"EDINET fetch failed for {edinet_code}: {e}")
         return None
 
@@ -95,7 +96,7 @@ async def search_companies_edinet(query: str) -> list[dict[str, Any]]:
                 }
                 for c in companies[:10]
             ]
-    except Exception as e:
+    except (httpx.HTTPError, ConnectionError, TimeoutError) as e:
         logger.warning(f"EDINET search failed: {e}")
         return []
 
@@ -131,7 +132,7 @@ async def get_company_disclosures(
                 }
                 for d in result.disclosures
             ]
-    except Exception as e:
+    except (httpx.HTTPError, ConnectionError, TimeoutError) as e:
         logger.warning(f"TDNET fetch failed for {code}: {e}")
         return []
 
@@ -157,7 +158,7 @@ async def get_latest_disclosures(limit: int = 20) -> list[dict[str, Any]]:
                 }
                 for d in result.disclosures
             ]
-    except Exception as e:
+    except (httpx.HTTPError, ConnectionError, TimeoutError) as e:
         logger.warning(f"TDNET latest fetch failed: {e}")
         return []
 
@@ -204,7 +205,7 @@ async def get_stock_price(
             "price_to_book": result.price_to_book,
             "market_cap": result.market_cap,
         }
-    except Exception as e:
+    except (httpx.HTTPError, ConnectionError, TimeoutError) as e:
         logger.warning(f"yfinance fetch failed for {code}: {e}")
         return None
 
@@ -239,7 +240,7 @@ async def get_estat_data(
                 }
                 for t in tables
             ]
-    except Exception as e:
+    except (httpx.HTTPError, ConnectionError, TimeoutError) as e:
         logger.warning(f"e-Stat search failed: {e}")
         return []
 
@@ -282,7 +283,11 @@ async def test_connections() -> dict[str, str]:
                 results[source] = f"ok ({len(tables)} results)"
             elif source == "stock":
                 results[source] = "ok (installed)"
-        except Exception as e:
+        except Exception as e:  # Broad catch: each source uses a different optional
+            # package (edinet_mcp, tdnet_disclosure_mcp, estat_mcp) that may raise
+            # httpx.HTTPError, ConnectionError, TimeoutError, ImportError,
+            # AttributeError, or KeyError depending on version/availability.
+            # This diagnostic function must report failures, never crash.
             results[source] = f"error: {e}"
 
     return results
