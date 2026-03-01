@@ -1,6 +1,6 @@
 [project]
 name = "japanfinance-agent"
-version = "0.1.7"
+version = "0.1.8"
 description = "Compound MCP agent combining Japan finance data sources — EDINET, TDNET, e-Stat, stock prices"
 readme = "README.md"
 license = "Apache-2.0"
@@ -30,18 +30,20 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-edinet = ["edinet-mcp>=0.6.0"]
+edinet = ["edinet-mcp>=0.6.3", "japan-finance-codes>=0.1.0"]
 tdnet = ["tdnet-disclosure-mcp>=0.1.0"]
 estat = ["estat-mcp>=0.2.1"]
 stock = ["stockprice-mcp>=0.1.0"]
 all = [
-    "edinet-mcp>=0.6.0",
+    "edinet-mcp>=0.6.3",
+    "japan-finance-codes>=0.1.0",
     "tdnet-disclosure-mcp>=0.1.0",
     "estat-mcp>=0.2.1",
     "stockprice-mcp>=0.1.0",
 ]
 dev = [
-    "edinet-mcp>=0.6.0",
+    "edinet-mcp>=0.6.3",
+    "japan-finance-codes>=0.1.0",
     "tdnet-disclosure-mcp>=0.1.0",
     "estat-mcp>=0.2.1",
     "stockprice-mcp>=0.1.0",
@@ -89,7 +91,7 @@ packages = ["japanfinance_agent"]
 mypy_path = ["src"]
 
 [[tool.mypy.overrides]]
-module = ["yfinance_mcp", "yfinance_mcp.*", "edinet_mcp", "edinet_mcp.*", "tdnet_disclosure_mcp", "tdnet_disclosure_mcp.*", "estat_mcp", "estat_mcp.*"]
+module = ["yfinance_mcp", "yfinance_mcp.*", "edinet_mcp", "edinet_mcp.*", "japan_finance_codes", "japan_finance_codes.*", "tdnet_disclosure_mcp", "tdnet_disclosure_mcp.*", "estat_mcp", "estat_mcp.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

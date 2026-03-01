@@ -28,6 +28,52 @@ def _is_available(package: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
+# Company registry (japan-finance-codes)
+# ---------------------------------------------------------------------------
+
+_registry_cache: Any = None
+
+
+async def _get_registry() -> Any:
+    """Lazily initialize and cache the CompanyRegistry singleton."""
+    global _registry_cache  # noqa: PLW0603
+    if _registry_cache is not None:
+        return _registry_cache
+    if not _is_available("japan_finance_codes"):
+        return None
+    from japan_finance_codes import CompanyRegistry
+
+    try:
+        _registry_cache = await CompanyRegistry.create()
+    except Exception as e:
+        logger.warning(f"Failed to initialize CompanyRegistry: {e}")
+        return None
+    return _registry_cache
+
+
+async def resolve_company(identifier: str) -> dict[str, Any] | None:
+    """Resolve any company identifier to a company dict.
+
+    Auto-detects identifier type (EDINET code, ticker, sec_code, corporate number).
+    Falls back to EDINET search if registry is unavailable.
+    """
+    registry = await _get_registry()
+    if registry is not None:
+        company = registry.resolve(identifier)
+        if company is not None:
+            return {
+                "edinet_code": company.edinet_code,
+                "name": company.name,
+                "ticker": company.ticker,
+                "sec_code": company.sec_code,
+                "corporate_number": company.corporate_number,
+            }
+    # Fallback to direct EDINET search
+    results = await search_companies_edinet(identifier)
+    return results[0] if results else None
+
+
+# ---------------------------------------------------------------------------
 # EDINET adapter
 # ---------------------------------------------------------------------------
 
@@ -79,7 +125,36 @@ async def get_company_statements(
 
 
 async def search_companies_edinet(query: str) -> list[dict[str, Any]]:
-    """Search companies via EDINET."""
+    """Search companies via EDINET.
+
+    Uses CompanyRegistry (O(1) index lookup) when available,
+    falls back to EdinetClient.search_companies() otherwise.
+    """
+    # Try registry first (O(1) for exact code lookups)
+    registry = await _get_registry()
+    if registry is not None:
+        company = registry.resolve(query)
+        if company is not None:
+            return [
+                {
+                    "edinet_code": company.edinet_code,
+                    "name": company.name,
+                    "ticker": company.ticker,
+                }
+            ]
+        # Name search via registry
+        results = registry.search(query, limit=10)
+        if results:
+            return [
+                {
+                    "edinet_code": c.edinet_code,
+                    "name": c.name,
+                    "ticker": c.ticker,
+                }
+                for c in results
+            ]
+
+    # Fallback to direct EdinetClient
     if not _is_available("edinet_mcp"):
         return []
 
@@ -254,6 +329,7 @@ def check_available_sources() -> dict[str, bool]:
     """Check which data sources are available."""
     sources = {
         "edinet": "edinet_mcp",
+        "registry": "japan_finance_codes",
         "tdnet": "tdnet_disclosure_mcp",
         "estat": "estat_mcp",
         "stock": "yfinance_mcp",
@@ -281,6 +357,10 @@ async def test_connections() -> dict[str, str]:
             elif source == "estat":
                 tables = await get_estat_data("GDP", limit=1)
                 results[source] = f"ok ({len(tables)} results)"
+            elif source == "registry":
+                registry = await _get_registry()
+                count = len(registry) if registry else 0
+                results[source] = f"ok ({count} companies)"
             elif source == "stock":
                 results[source] = "ok (installed)"
         except Exception as e:  # Broad catch: each source uses a different optional

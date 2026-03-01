@@ -158,15 +158,18 @@ async def _resolve_edinet_code(
 ) -> tuple[str | None, str | None]:
     """Resolve EDINET code for a stock code if not already provided.
 
+    Uses CompanyRegistry.resolve() for auto-detection of identifier type,
+    with fallback to EDINET search.
+
     Returns:
         (edinet_code, company_name) — company_name is set only when
         edinet_code was resolved via search.
     """
     if edinet_code is not None:
         return edinet_code, None
-    companies = await adapters.search_companies_edinet(code)
-    if companies:
-        return companies[0]["edinet_code"], companies[0]["name"]
+    result = await adapters.resolve_company(code)
+    if result:
+        return result["edinet_code"], result["name"]
     return None, None
 
 
