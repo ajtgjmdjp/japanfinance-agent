@@ -36,7 +36,7 @@ _registry_cache: Any = None
 
 async def _get_registry() -> Any:
     """Lazily initialize and cache the CompanyRegistry singleton."""
-    global _registry_cache  # noqa: PLW0603
+    global _registry_cache
     if _registry_cache is not None:
         return _registry_cache
     if not _is_available("japan_finance_codes"):
