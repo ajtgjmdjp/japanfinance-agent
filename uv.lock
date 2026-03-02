@@ -824,14 +824,11 @@ wheels = [
 
 [[package]]
 name = "japan-finance-codes"
-version = "0.1.0"
+version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "edinet-mcp" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/38/1e/c7468a151f02244592387216e01346b17151c2fd2ee6d6b2c7c7922fb88d/japan_finance_codes-0.1.0.tar.gz", hash = "sha256:8ae9ecab95dcb540a0ea76ecc1e5527e5a1ad84217cd2781b96fe9b4eed9b502", size = 100234, upload-time = "2026-03-01T18:14:55.181Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1a/6d/4f51132b9c58659daa6381ac50d054c3d40017eb6477a5b2d188182a0933/japan_finance_codes-0.2.0.tar.gz", hash = "sha256:09171e97b3596014058700d8e02ab6be7006ecf4ba6e284671d3b44ead3933ae", size = 457653, upload-time = "2026-03-02T15:34:12.489Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/94/f9/6644d7f8ac592c5b66c0e6fc427c7f3668503e55995e3d1c6badeb18fa32/japan_finance_codes-0.1.0-py3-none-any.whl", hash = "sha256:265175835ba4e12756f77bd66f1fa7b1effb24164bcd3e9a95f775ade4cdca86", size = 3674, upload-time = "2026-03-01T18:14:52.107Z" },
+    { url = "https://files.pythonhosted.org/packages/17/e8/cb7f41b2af61d0a1328ff1b0213384859501b4cf4f0abd7d371ed86b9e99/japan_finance_codes-0.2.0-py3-none-any.whl", hash = "sha256:52befd4b5b7b94894301a50dfcb4c14b5fdf55d83afbfabe55216f04aa51632b", size = 348416, upload-time = "2026-03-02T15:34:14.687Z" },
 ]
 
 [[package]]
