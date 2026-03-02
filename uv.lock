@@ -609,7 +609,7 @@ wheels = [
 [[package]]
 name = "edinet-mcp"
 version = "0.6.3"
-source = { editable = "../edinet-mcp" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
     { name = "defusedxml" },
@@ -622,30 +622,10 @@ dependencies = [
     { name = "python-dotenv" },
     { name = "pyyaml" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "click", specifier = ">=8.0" },
-    { name = "defusedxml", specifier = ">=0.7" },
-    { name = "fastmcp", specifier = ">=2.0,<3.0" },
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "loguru", specifier = ">=0.7" },
-    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
-    { name = "pandas", marker = "extra == 'pandas'", specifier = ">=2.0" },
-    { name = "polars", specifier = ">=0.20" },
-    { name = "pydantic", specifier = ">=2.0" },
-    { name = "pydantic-settings", specifier = ">=2.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0" },
-    { name = "python-dotenv", specifier = ">=1.0" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4" },
-    { name = "types-defusedxml", marker = "extra == 'dev'", specifier = ">=0.7" },
-    { name = "types-pyyaml", marker = "extra == 'dev'", specifier = ">=6.0" },
-    { name = "vcrpy", marker = "extra == 'dev'", specifier = ">=6.0" },
+sdist = { url = "https://files.pythonhosted.org/packages/8f/02/c2c58c2dbd4d4f65015f9e56840803f0c93e47ad113139efb47869d50e4b/edinet_mcp-0.6.3.tar.gz", hash = "sha256:e4ac45e776749c866e01db7e556bebb9a95521044cc320c4ee98624ae9ad35e8", size = 217716, upload-time = "2026-03-01T18:03:36.289Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/75/d7/d48b8ec1a30932da50c28f26515bdc31885dc52c54d6b0f7bfb0c3472155/edinet_mcp-0.6.3-py3-none-any.whl", hash = "sha256:07a8bab0118b9e608428b93cfe506f5590681d27d6cde867272540455df177e4", size = 58908, upload-time = "2026-03-01T18:03:37.602Z" },
 ]
-provides-extras = ["pandas", "dev"]
 
 [[package]]
 name = "email-validator"
@@ -845,25 +825,18 @@ wheels = [
 [[package]]
 name = "japan-finance-codes"
 version = "0.1.0"
-source = { editable = "../japan-finance-codes" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "edinet-mcp" },
 ]
-
-[package.metadata]
-requires-dist = [{ name = "edinet-mcp", editable = "../edinet-mcp" }]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "mypy", specifier = ">=1.0" },
-    { name = "pytest", specifier = ">=9.0" },
-    { name = "pytest-asyncio", specifier = ">=1.3" },
-    { name = "ruff", specifier = ">=0.4" },
+sdist = { url = "https://files.pythonhosted.org/packages/38/1e/c7468a151f02244592387216e01346b17151c2fd2ee6d6b2c7c7922fb88d/japan_finance_codes-0.1.0.tar.gz", hash = "sha256:8ae9ecab95dcb540a0ea76ecc1e5527e5a1ad84217cd2781b96fe9b4eed9b502", size = 100234, upload-time = "2026-03-01T18:14:55.181Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/94/f9/6644d7f8ac592c5b66c0e6fc427c7f3668503e55995e3d1c6badeb18fa32/japan_finance_codes-0.1.0-py3-none-any.whl", hash = "sha256:265175835ba4e12756f77bd66f1fa7b1effb24164bcd3e9a95f775ade4cdca86", size = 3674, upload-time = "2026-03-01T18:14:52.107Z" },
 ]
 
 [[package]]
 name = "japanfinance-agent"
-version = "0.1.7"
+version = "0.1.8"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -910,17 +883,17 @@ tdnet = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.0" },
-    { name = "edinet-mcp", marker = "extra == 'all'", editable = "../edinet-mcp" },
-    { name = "edinet-mcp", marker = "extra == 'dev'", editable = "../edinet-mcp" },
-    { name = "edinet-mcp", marker = "extra == 'edinet'", editable = "../edinet-mcp" },
+    { name = "edinet-mcp", marker = "extra == 'all'", specifier = ">=0.6.3" },
+    { name = "edinet-mcp", marker = "extra == 'dev'", specifier = ">=0.6.3" },
+    { name = "edinet-mcp", marker = "extra == 'edinet'", specifier = ">=0.6.3" },
     { name = "estat-mcp", marker = "extra == 'all'", specifier = ">=0.2.1" },
     { name = "estat-mcp", marker = "extra == 'dev'", specifier = ">=0.2.1" },
     { name = "estat-mcp", marker = "extra == 'estat'", specifier = ">=0.2.1" },
     { name = "fastmcp", specifier = ">=2.0,<3.0" },
     { name = "httpx", specifier = ">=0.27" },
-    { name = "japan-finance-codes", marker = "extra == 'all'", editable = "../japan-finance-codes" },
-    { name = "japan-finance-codes", marker = "extra == 'dev'", editable = "../japan-finance-codes" },
-    { name = "japan-finance-codes", marker = "extra == 'edinet'", editable = "../japan-finance-codes" },
+    { name = "japan-finance-codes", marker = "extra == 'all'", specifier = ">=0.1.0" },
+    { name = "japan-finance-codes", marker = "extra == 'dev'", specifier = ">=0.1.0" },
+    { name = "japan-finance-codes", marker = "extra == 'edinet'", specifier = ">=0.1.0" },
     { name = "loguru", specifier = ">=0.7" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.10" },
     { name = "pydantic", specifier = ">=2.0" },

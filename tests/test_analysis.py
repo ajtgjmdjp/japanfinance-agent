@@ -22,9 +22,7 @@ class TestBuildAnalysisReport:
             "disclosures": [{"company_name": "Test Corp", "title": "決算短信"}],
             "stock_price": {"close": 1500, "currency": "JPY"},
         }
-        result = _build_analysis_report(
-            data, code="1234", edinet_code="E00001", company_name=None
-        )
+        result = _build_analysis_report(data, code="1234", edinet_code="E00001", company_name=None)
         assert result["code"] == "1234"
         assert result["edinet_code"] == "E00001"
         assert result["company_name"] == "Test Corp"
@@ -34,9 +32,7 @@ class TestBuildAnalysisReport:
         assert sorted(result["sources_used"]) == ["edinet", "tdnet", "yfinance"]
 
     def test_empty_data(self) -> None:
-        result = _build_analysis_report(
-            {}, code="9999", edinet_code=None, company_name=None
-        )
+        result = _build_analysis_report({}, code="9999", edinet_code=None, company_name=None)
         assert result["code"] == "9999"
         assert result["statements"] is None
         assert result["disclosures"] == []
@@ -73,9 +69,7 @@ class TestBuildAnalysisReport:
         data = {
             "disclosures": [{"company_name": "From TDNET"}],
         }
-        result = _build_analysis_report(
-            data, code="1234", edinet_code=None, company_name=None
-        )
+        result = _build_analysis_report(data, code="1234", edinet_code=None, company_name=None)
         assert result["company_name"] == "From TDNET"
 
 

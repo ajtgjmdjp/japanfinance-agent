@@ -103,9 +103,7 @@ def _process_disclosures(
     return disclosures, None
 
 
-def _process_stock_price(
-    data: dict[str, Any], sources_used: list[str]
-) -> dict[str, Any] | None:
+def _process_stock_price(data: dict[str, Any], sources_used: list[str]) -> dict[str, Any] | None:
     """Process stock price from raw gather results."""
     raw = _safe_result(data, "stock_price", "Stock price error")
     if raw is None:
@@ -270,9 +268,7 @@ async def macro_snapshot(
     )
 
 
-def _process_single_earnings(
-    code: str, result: Any
-) -> tuple[EarningsEntry, int]:
+def _process_single_earnings(code: str, result: Any) -> tuple[EarningsEntry, int]:
     """Process a single company's fetch result into an EarningsEntry.
 
     Returns:
