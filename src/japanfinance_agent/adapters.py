@@ -44,7 +44,7 @@ async def _get_registry() -> Any:
     from japan_finance_codes import CompanyRegistry
 
     try:
-        _registry_cache = await CompanyRegistry.create()
+        _registry_cache = CompanyRegistry.create()
     except Exception as e:
         logger.warning(f"Failed to initialize CompanyRegistry: {e}")
         return None
