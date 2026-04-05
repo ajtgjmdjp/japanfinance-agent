@@ -1,5 +1,8 @@
 # japanfinance-agent
 
+> **Status: Maintenance mode** — This project is stable and functional but not actively developed. Issues and PRs are welcome.
+
+
 [![CI](https://github.com/ajtgjmdjp/japanfinance-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/ajtgjmdjp/japanfinance-agent/actions/workflows/ci.yml)
 [![PyPI version](https://badge.fury.io/py/japanfinance-agent.svg)](https://pypi.org/project/japanfinance-agent/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
